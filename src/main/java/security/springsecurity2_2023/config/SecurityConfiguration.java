@@ -1,6 +1,6 @@
 package security.springsecurity2_2023.config;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -12,11 +12,28 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+    private final String[] availablePages = new String[] {
+            "https://fonts.googleapis.com/css?family=Open+Sans:400,700",
+            "page/registration",
+            "act/registration",
+            "page/unregistered",
+            "act/unregistered",
+            "/api/v1/auth/**",
+            "/rest/registration",
+            "/registration",
+            "",
+    };
+
+    @Autowired
+    public SecurityConfiguration(JwtAuthenticationFilter jwtAuthFilter,
+                                 AuthenticationProvider authenticationProvider) {
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.authenticationProvider = authenticationProvider;
+    }
 
     @Bean // связывание фильтра со Spring App
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)
@@ -27,7 +44,7 @@ public class SecurityConfiguration {
                 .disable()
                 //filter white list
                 .authorizeHttpRequests()
-                .requestMatchers("")//some patterns, should not be auth
+                .requestMatchers(availablePages)//should not be filtered
                 .permitAll() //patterns
                 .anyRequest()
                 .authenticated()
